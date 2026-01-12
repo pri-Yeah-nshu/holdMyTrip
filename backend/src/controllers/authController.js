@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const RefreshToken = require("../models/refreshTokenModel");
+const { signAccessToken, signRefreshToken } = require("../utils/token");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const bcrypt = require("bcryptjs");
@@ -62,13 +64,23 @@ exports.login = async (req, res) => {
       });
     }
     // Generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+    // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    //   expiresIn: process.env.JWT_EXPIRES_IN,
+    // });
+    const accessToken = signAccessToken(user._id);
+    const refreshToken = signRefreshToken(user._id);
+
+    await RefreshToken.create({
+      user: user._id,
+      token: refreshToken,
+      expiredAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
+
     res.status(200).json({
       status: "success",
       data: {
-        token,
+        refreshToken,
+        accessToken,
         user,
       },
     });
@@ -79,3 +91,48 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+exports.refreshAccessToken = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return next(new AppError("Refresh token required", 401));
+  }
+
+  //  Verify token cryptographically
+  const decoded = jwt.verify(refreshToken, process.env.JWT_RT_SECRET);
+
+  //  Check DB (revoked or not)
+  const storedToken = await RefreshToken.findOne({
+    token: refreshToken,
+    revoked: false,
+  });
+
+  if (!storedToken) {
+    return next(new AppError("Invalid refresh token", 403));
+  }
+
+  //  Issue new access token
+  const newAccessToken = signAccessToken(decoded.id);
+
+  res.status(200).json({
+    status: "success",
+    accessToken: newAccessToken,
+  });
+});
+
+exports.logout = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  if (refreshToken) {
+    await RefreshToken.findOneAndUpdate(
+      { token: refreshToken },
+      { revoked: true }
+    );
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Logged out successfully",
+  });
+});
