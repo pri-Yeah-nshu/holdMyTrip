@@ -1,0 +1,10 @@
+#env file
+config.env
+.env
+
+# logs
+log/
+*.log
+
+# node
+node_modules/
