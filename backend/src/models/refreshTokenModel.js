@@ -10,7 +10,7 @@ const refreshTokenSchema = new mongoose.Schema(
     token: {
       type: String,
       require: true,
-      unique: true,
+      // unique: true,
     },
     expiredAt: {
       type: Date,
@@ -25,5 +25,9 @@ const refreshTokenSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+refreshTokenSchema.index({ token: 1 }, { unique: true });
+refreshTokenSchema.index({ user: 1 });
+refreshTokenSchema.index({ expiredAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("refreshToken", refreshTokenSchema);

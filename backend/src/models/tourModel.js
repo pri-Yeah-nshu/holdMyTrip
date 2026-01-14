@@ -14,7 +14,7 @@ const tourSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      unique: true,
+      // unique: true,
     },
     price: {
       type: Number,
@@ -45,7 +45,7 @@ tourSchema.pre("save", async function () {
   //   next();
 });
 
-tourSchema.index({ slug: 1 });
+tourSchema.index({ slug: 1 }, { unique: true });
 tourSchema.index({ price: 1 });
 tourSchema.index({ duration: 1 });
 tourSchema.index({

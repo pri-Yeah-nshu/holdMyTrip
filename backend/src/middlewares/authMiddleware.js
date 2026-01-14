@@ -19,7 +19,7 @@ exports.protect = async (req, res, next) => {
       });
     }
     // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_AT_SECRET);
 
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {

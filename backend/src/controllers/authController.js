@@ -67,8 +67,8 @@ exports.login = async (req, res) => {
     // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     //   expiresIn: process.env.JWT_EXPIRES_IN,
     // });
-    const accessToken = signAccessToken(user._id);
-    const refreshToken = signRefreshToken(user._id);
+    const accessToken = signAccessToken(user);
+    const refreshToken = signRefreshToken(user);
 
     await RefreshToken.create({
       user: user._id,
@@ -112,8 +112,10 @@ exports.refreshAccessToken = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid refresh token", 403));
   }
 
+  const user = await User.findById(decoded.id);
+
   //  Issue new access token
-  const newAccessToken = signAccessToken(decoded.id);
+  const newAccessToken = signAccessToken(user);
 
   res.status(200).json({
     status: "success",

@@ -22,8 +22,8 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["booked", "cancelled", "completed"],
-      default: "booked",
+      enum: ["pending", "booked", "cancelled", "completed"],
+      default: "pending",
     },
   },
   { timestamps: true }
@@ -32,7 +32,7 @@ const bookingSchema = new mongoose.Schema(
 bookingSchema.index({ user: 1 });
 bookingSchema.index({ tour: 1 });
 bookingSchema.index({ status: 1 });
-bookingSchema.index({ tour: 1, status: 1 });
+bookingSchema.index({ user: 1, tour: 1 }, { unique: true });
 
 const Booking = mongoose.model("Booking", bookingSchema);
 
