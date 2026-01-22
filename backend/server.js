@@ -1,6 +1,10 @@
 const dotenv = require("dotenv");
 const startJob = require("./src/jobs/index");
-dotenv.config({ path: "./config.env" });
+const path = require("path");
+require("dotenv").config({
+  path: path.join(__dirname, "config.env"),
+});
+
 const app = require("./src/app");
 const connectDB = require("./src/config/db");
 connectDB();
