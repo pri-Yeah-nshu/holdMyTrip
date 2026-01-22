@@ -10,6 +10,7 @@ const {
   loginValidator,
 } = require("../validator/authValidator");
 const validate = require("../middlewares/validateMiddleware");
+const { rateLimiter } = require("../utils/rateLimiter");
 
 const router = express.Router();
 
@@ -21,5 +22,12 @@ router.post(
   authController.refreshAccessToken
 );
 router.post("/signup", validateSignup, validate, signup);
-router.post("/login", loginValidator, loginLimiter, validate, login);
+router.post(
+  "/login",
+  rateLimiter(login, 5, 15 * 60),
+  loginValidator,
+  loginLimiter,
+  validate,
+  login
+);
 module.exports = router;

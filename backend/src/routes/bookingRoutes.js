@@ -32,3 +32,4 @@ router.patch(
 router.post("/", protect, createBookingValidator, validate, createBooking);
 router.get("/my", protect, getMyBookings);
 module.exports = router;
+// to do add booked route
